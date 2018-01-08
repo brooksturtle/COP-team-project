@@ -1,6 +1,13 @@
 #ifndef MEMORY_H
 #define MEMORY_H
+#include <vector>
+#include <string>
+#include <sstream>
+#include "fileObject.h"
+#include "dirent.h"
 
+
+using namespace std;
 class memory
 {
     private:
@@ -198,7 +205,7 @@ int memory::checkFileExistence(string name)
 void memory::addTagToFile(int index, string tag)
 {
     memoryVector[index].addTag(tag);
-    
+
 }
 
 /*
@@ -242,7 +249,7 @@ void memory::deleteTagFromFile(string file, string tag)
     if (isEmpty)
     {
         memoryVector.erase (memoryVector.begin()+ index);
-		
+
     }*/
 
 }

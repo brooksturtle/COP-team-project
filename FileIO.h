@@ -1,7 +1,12 @@
-
 #ifndef FILEIO_H
 #define FILEIO_H
+#include <vector>
+#include <string>
+#include <algorithm>
+#include "memory.h"
+#include "fileObject.h"
 
+using namespace std;
 
 
 bool is_in_vector(vector<string> v, string to_find) {

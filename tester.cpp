@@ -10,14 +10,14 @@
 #include "FileIO.h"
 
 
-#include <cstdlib>
+
 
 using namespace std;
 vector<string> splitString(string);
 
 int main()
 {
-    
+
     vector<string> stuff;
 
     vector<fileObject> init;
@@ -88,7 +88,7 @@ int main()
                 break;
 			}
             case 2: {
-                
+
                 cout<<"What file would you like to delete the tag from?"<<endl;
                 string filename;
                 cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -98,15 +98,15 @@ int main()
                 {
 					cout << "A file with that name does not exist. Returning to menu." << endl;
 					break;
-				} 
-				
+				}
+
 				cout<<"Which tag would you like to delete?"<<endl;
                 string tagDelete;
                 getline(cin, tagDelete);
-           
+
                 mem.deleteTagFromFile(filename, tagDelete);
-                
-               
+
+
                 break;
 			}
 
@@ -137,7 +137,7 @@ int main()
                 }
                 break;
 			}
-			
+
 
             case 5: {
                 mem.stringifyMemory();
