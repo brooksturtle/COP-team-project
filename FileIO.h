@@ -52,6 +52,8 @@ FileIO::FileIO() {
 
 	}
 	success = true;
+	for (vector<string>::iterator i = cwd_files.begin(); i != cwd_files.end(); i++)
+		cout<< *i << '\n';
 }
 
 

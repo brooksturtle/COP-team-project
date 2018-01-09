@@ -7,5 +7,4 @@ t.o: exec test
 tester.cpp: 
 .git: 
 README.md: 
-tester.o: 
 memory.h: 
