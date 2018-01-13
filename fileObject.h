@@ -60,6 +60,7 @@ void fileObject::addTag(string tag)
     tagList.push_back(tag);
 }
 
+//simply gets rid of comma from a tag
 string fileObject::commaChecker(string tag)
 {
     int position;

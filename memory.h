@@ -60,6 +60,9 @@ bool memory::initializeMemory(){
     string current_line;
     string temp_filename;
     string temp_tag;
+	// Opens text file. It is in the order of file: tag1, tag2
+	// takes file as temp_filename and tags as a vector for create 
+	// FileObject
     if(ifs.is_open()){
 
         while(getline(ifs, current_line)){
