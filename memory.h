@@ -3,9 +3,10 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <iostream>
 #include "fileObject.h"
 #include "dirent.h"
-
+#include <math.h>
 
 using namespace std;
 class memory
@@ -30,12 +31,15 @@ class memory
         void deleteFileObject(string file);
         // Loads the previously saved file objects to memory. Only to be used once on creation
         bool initializeMemory();
+		int getAlphabeticLocation(string fileName, int);
 
         void printMemory();
         void switchAdd(string, string);
         string lowerCase(string);
         bool deleteDuplicates(string, int index);
         vector<fileObject> getMemory();
+		void printTags();
+		void list_delete_tag();
 
 };
 
@@ -43,6 +47,7 @@ vector<fileObject> memory::getMemory()
 {
 	return memoryVector;
 }
+
 
 // passing by reference to make the run cost less
 memory::memory(vector<fileObject> &init)
@@ -87,6 +92,67 @@ bool memory::initializeMemory(){
 
     ifs.close();
     return worked;
+} 
+
+void memory::list_delete_tag()
+{
+	 cout<<"What file would you like to delete the tag from?"<<endl;
+	 int enormity = memoryVector.size();
+	 for (int i =0; i< enormity; i++)
+	 {
+         cout<<i<<". ";
+		 memoryVector[i].printTagList();
+	 }
+	 cout<<enormity<<". Go Back\n";
+	 int input;
+	 cin>>input;
+	while (input > enormity || input < 0 || cin.fail())
+	{
+		cin.clear();
+		cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		cout<<"Invalid Input"<<endl;
+		cin>>input;
+	}
+	
+	vector<string> tag_list;
+	// option to exit deletion menu
+	if (input == enormity)
+	{
+		return;
+	}
+	// need to get tags to make a selection
+	else{
+		
+		cout<<"What tag would you like to delete?"<<endl;
+		tag_list= memoryVector[input].getTagList();
+		enormity = tag_list.size();
+		if (enormity == 0)
+		{
+			cout<<"This file has no tags"<<endl;
+			return;
+		}
+		for (int i = 0; i < enormity; i++)
+		{
+			cout<<i<<". "<<tag_list[i]<<endl;
+		}
+		int tag_choice;
+		 cin>>tag_choice;
+		while (tag_choice > enormity || tag_choice < 0 || cin.fail())
+		{
+			cin.clear();
+			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			cout<<"Invalid Input"<<endl;
+			cin>>input;
+		}
+		bool not_empty =memoryVector[input].delete_tag_by_index(tag_choice);
+		if (!not_empty)
+		{
+			memoryVector.erase(memoryVector.begin()+input);
+			return;
+		}
+		}
+	return;
+	 
 }
 
 void memory::deleteFileObject(string file)
@@ -115,6 +181,7 @@ bool memory::deleteDuplicates(string tag, int index)
     return match;
 }
 
+
 /*
     This function will take in the tags you want to add to a
     certain file. If that file does not yet exist in the memoryVector,
@@ -123,18 +190,28 @@ bool memory::deleteDuplicates(string tag, int index)
     designated fileObject.
     Assumes that a nonexistent directory file will not be input
 */
+// make this a binary add
 void memory::switchAdd(string tag, string file)
-{
-    // changes the tags to lower case
-    tag = lowerCase(tag);
-    // checks for repetition of tags in vector or target file
-    int index = checkFileExistence(file);
-
-
-    vector<string> tags;
-    tags.push_back(tag);
-    cout << "'" << tag << "' was added succesfully." << endl;
-
+{	
+	vector<string> tags;
+	tags.push_back(tag);
+	
+	int index;
+	int place;
+	if (memoryVector.size() == 0)
+	{
+		index = -1;
+		place = 0;
+	}
+	// error if checked when size is zero
+	else{
+		index = checkFileExistence(file);
+	}
+	
+	
+	 place = getAlphabeticLocation(file, 0);
+	
+    
     if (index == -1)
     {
         createFileObject(tags, file);
@@ -147,6 +224,7 @@ void memory::switchAdd(string tag, string file)
         else
             memoryVector[index].addTag(tag);
     }
+	cout << "'" << tag << "' was added succesfully." << endl;
 }
 
 void memory::remove_from_string( string &str, string chars_to_remove ) {
@@ -156,10 +234,45 @@ void memory::remove_from_string( string &str, string chars_to_remove ) {
 }
 
 // initializes fileObject and the adds it to the memoryVector
+// use binary sort to find location to insert in 
 void memory::createFileObject(vector<string>& tags, string file)
 {
     fileObject cell(tags, file);
-    memoryVector.push_back(cell);
+	// caveat if no file objects
+	if (memoryVector.size() == 0)
+	{
+		memoryVector.push_back(cell);
+		return;
+	}
+	else{
+		// get proposed file Location, use binary
+	int insertPoint = getAlphabeticLocation(file, 0);
+	memoryVector.insert(memoryVector.begin()+insertPoint, cell);
+	}
+}
+
+
+// will be called knowing that file does not exist
+// returns the index of where the file should go alphabetically
+// i would like to ignore caps
+int memory::getAlphabeticLocation(string fileName, int which)
+{
+	transform(fileName.begin(), fileName.end(), fileName.begin(), ::tolower);
+
+	int size = memoryVector.size();
+	string returnedFile;
+	for (int i =0; i < size; i++)
+	{
+		returnedFile = memoryVector[i].returnFileName();
+		transform(returnedFile.begin(), returnedFile.end(), returnedFile.begin(), ::tolower);
+		
+		// will return if it finds a place where file does not alphabetically fit
+		if (fileName< returnedFile)
+		{
+			return i;
+		}
+	}
+	return size;
 }
 
 // iterates through memory vector and calls print function for file object
@@ -176,30 +289,62 @@ void memory::printMemory()
      }
 }
 
+
 // returns index of fileObject within memoryVector
 // if the object is not found then this returns -1
 // this speeds process of adding tags and also safeguards
 // against adding tag to nonexistent file
+
+// this should be binary
 int memory::checkFileExistence(string name)
 {
+	// lower case the strings
+	transform(name.begin(), name.end(), name.begin(), ::tolower);
+	if (memoryVector.size() == 0)
+	{
+		return -1;
+	}
     int counter = 0;
-    int enormity = memoryVector.size();
     int index = -1;
-    string fileObjectName;
+    string returnedName= "";
+	
+	int bottom = 0;
+	int top = memoryVector.size()-1;
+	int middle = (bottom + top )/2;
+	
+	// this search should be O(log n) vs O(n)
+	while (1 ==1)
+	{
+		
+		returnedName = memoryVector[middle].returnFileName();
+		transform(returnedName.begin(), returnedName.end(), returnedName.begin(), ::tolower);
 
-    while (counter < enormity)
-    {
-        fileObjectName= memoryVector[counter].returnFileName();
-
-        if (name == fileObjectName)
+		if (name == returnedName)
         {
-            index = counter;
+            index = middle;
+			break;
         }
-        counter++;
-    }
+	
+		// break condition means we have fully searched and found nothing
+		if (top == middle || bottom == middle)
+		{
+			return -1;
+		}
+		else if (returnedName > name)
+		{
+			top = middle;
+			middle = (top + bottom)/2;
+		}
+		else if (returnedName < name)
+		{
+			bottom = middle;
+			middle = (top + bottom + 1)/2;
+		}
+	}
 
     return index;
 }
+
 
 /*
     Adds tag to file assuming that checkFileExistence has already been
@@ -243,28 +388,9 @@ void memory::deleteTagFromFile(string file, string tag)
         cout<<endl<<endl;
         return;
     }
-
-    /*
-    bool isEmpty;
-
-    isEmpty = memoryVector[index].deleteTag(tag);
-	cout << "'" << tag << "' was deleted succesfully." << endl;
-    if (isEmpty)
-    {
-        memoryVector.erase (memoryVector.begin()+ index);
-
-    }*/
-
 }
 
-/*
-    will call the checkForTag method for each object in memoryVector.
-    if it finds that tag the name of the file containing that tag will
-    be added to a stringVector.
-    This is useful when attempting to delete a tag from every file that
-    has that tag. This is also important when the user wants to search
-    for files that only contain that tag.
-*/
+
 vector<string> memory::searchForFilesWithTag(string tag)
 {
     int counter = 0;
@@ -284,17 +410,6 @@ vector<string> memory::searchForFilesWithTag(string tag)
             fileList.push_back(file);
         }
         counter++;
-    }
-
-    // Not really sure how we want to deal with this when user searches
-    // For non existent tag. This method must return something so we may
-    // need to catch if the fileList is empty from somewhere else.
-    // Good idea to only allow user to search for tags from list of already
-    // existing ones. Maybe keep a list of used tags that we can compare their
-    // search input too.
-    if (fileList.size() == 0)
-    {
-        //cout<<"No file has tag: '"<<tag<<"'";
     }
 
     return fileList;

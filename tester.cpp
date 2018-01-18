@@ -4,6 +4,7 @@
 #include <iterator>
 #include <cstdlib>
 #include <limits>
+#include <Windows.h>
 #include <vector>
 #include <dirent.h> // directory header
 #include <stdio.h> // printf()
@@ -16,6 +17,7 @@
 #include "memory.h"
 #include "dirent.h"
 #include "FileIO.h"
+#include "fileObject.h"
 
 
 
@@ -53,8 +55,8 @@ int main()
 
     while(keepGoing)
     {
-        //1 addtag, 2 deleteTag, 3 print, 4 search, 5 stringifyMemory, 6 quit
-        cout<<"1. Add a tag\n2. Delete a tag\n3. Print\n4. Search\n5. Save\n6. Run\n7. Quit"<<endl;
+        //1 addtag, 2 deleteTag, 3 print by file, 4 search, 5 stringifyMemory, 6 quit
+        cout<<"1. Add a tag\n2. Delete a tag from file\n3. Print by File \n4. Search\n5. Run Files by Tag\n6. Save Changes\n7. Quit"<<endl;
         cin>>choice;
         while (choice > 7 || choice < 1 || cin.fail())
         {
@@ -90,25 +92,7 @@ int main()
                 break;
 			}
             case 2: {
-
-                cout<<"What file would you like to delete the tag from?"<<endl;
-                string filename;
-                cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                getline(cin, filename);
-                checker = mem.checkFileExistence(filename);
-                if(checker == -1)
-                {
-					cout << "A file with that name does not exist. Returning to menu." << endl;
-					break;
-				}
-
-				cout<<"Which tag would you like to delete?"<<endl;
-                string tagDelete;
-                getline(cin, tagDelete);
-
-                mem.deleteTagFromFile(filename, tagDelete);
-
-
+                mem.list_delete_tag();
                 break;
 			}
 
@@ -131,31 +115,46 @@ int main()
 
                 counter = 0;
                 enormity = fileList.size();
-                cout<<"Files with tag '"<<tagSearch<<"': ";
+                cout<<"Files with tag '"<<tagSearch<<"': "<<endl;
                 while (counter < enormity)
                 {
-                    cout<<fileList[counter]<<" ";
+                    cout<<fileList[counter]<<endl;
                     counter++;
                 }
                 break;
 			}
 
-
-            case 5: {
+           
+            case 5:
+                {
+					vector<string> toRun;
+                string runTag;
+                cout << "What tag would you like to open?" << endl;
+                cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                getline(cin, runTag);
+				toRun = mem.searchForFilesWithTag(runTag);
+				int toRunSize = toRun.size();
+				if (toRunSize == 0)
+				{
+					cout<<"There are no files with that tag"<<endl;
+					break;
+				}
+				else{
+					for (int i = 0; i < toRun.size(); i++)
+					{
+						const char* why = toRun[i].c_str();
+						system(why);
+					}
+					break;
+				}
+                }
+				
+			 case 6: {
                 mem.stringifyMemory();
                 cout << "Tags and file(s) saved!" << endl;
                 break;
 			}
-            case 6:
-                {
-                string toRun;
-                cout << "What file would you like to open?" << endl;
-                cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                getline(cin, toRun);
-
-                /*int result = */system(toRun.c_str());
-                break;
-                }
+			
             case 7: {
                 keepGoing=false;
                 cout<<"Save Changes? y/n"<<endl;

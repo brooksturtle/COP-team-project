@@ -32,7 +32,7 @@ class fileObject
         string returnFileName();
         vector<string>& getTagList();
         string commaChecker(string checkString);
-
+		bool delete_tag_by_index(int index);
 
 };
 
@@ -111,6 +111,31 @@ bool fileObject::deleteTag(string tag)
     }
 
     return isEmpty;
+
+	}
+
+bool fileObject::delete_tag_by_index(int index)
+{
+	string goner;
+	try{
+		goner=tagList[index];
+		tagList.erase(tagList.begin()+ index);
+		cout<<goner<<" deleted\n";
+		if (tagList.size() == 0)
+		{
+			return false;
+		}
+		else{
+			return true;
+		}
+	}
+	
+	catch(exception& e)
+	{
+		cout<<"Invalid Index\n";
+		return true;
+	}
+	
 }
 
 // this is going to print out all the tags- duh
